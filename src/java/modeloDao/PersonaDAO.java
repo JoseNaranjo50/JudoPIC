@@ -197,7 +197,7 @@ public class PersonaDAO implements CrudPersona {
         return lista;
     }
 
-    public boolean enviarCorreo(String txtUsuario) throws IOException {
+    public boolean enviarCorreo(String txtUsuario, String txtClave) throws IOException {
         boolean enviado = false;
         try {
             Properties props = new Properties();
@@ -206,49 +206,56 @@ public class PersonaDAO implements CrudPersona {
             props.setProperty("mail.smtp.port", "587");
             props.setProperty("mail.smtp.auth", "true");
 
+            String correoRemitente = "informaticauce2019@gmail.com";
+            String passwordRemitente = "informatica2019";
+
             Session session = Session.getDefaultInstance(props);
+            //new javax.mail.Authenticator() {
+            // protected PasswordAuthentication getPasswordAuthentication(){
+            //    return new PasswordAuthentication(correoRemitente, passwordRemitente);
+            // }
+            //});
 
-            String correoRemitente = "joelvargasarcos1994@gmail.com";
-            String passwordRemitente = "cotacfesvip";
-
-            String asunto = "Contraseña de autenticación temporal para app JudoPIC";
+            String asunto = "Link de Activación para app JudoPIC";
+            /*
             String mensaje = "	<html>\n"
                     + "	<body>\n"
-                    + "		<img src=\"cid:figura1\" height=\"47\" width=\"170\" />\n"
+                   + "		<img src=\"cid:figura1\" height=\"47\" width=\"170\" />\n"
                     + "		<p>Bienvenidos a la aplicación para deportistas de Judo de Pichincha</p>\n"
                     + "		<ul style=\"list-style-type:none\">	\n"
-                    + "			<li>Contraseña temporal:    JudoPic2019</li> \n"
+                    + "		<p> Link de Activación: "http://localhost:8084/JudoPIC/ActivateAccount?key1="+txtUsuario+"&key2="+myHash+" </p>\n"
                     + "		</ul>\n"
                     + "		<p>Por favor restablecer la contraseña al momento de iniciar sesión por primera vez.</p>\n"
                     + "		<p>Saludos.</p>\n"
-                    // + "		<img src=\"cid:${emailFoot}\" />\n"
+                   // + "		<img src=\"cid:${emailFoot}\" />\n"
                     + "	</body>\n"
                     + "	</html>";
-
+             */
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(correoRemitente));
 
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(txtUsuario));
             message.setSubject(asunto);
-            //message.setText(mensaje, "ISO-8859-1", "html");
+            message.setText("Link de Activación: " + "http://localhost:8084/ActivateAccount?key1=" + txtUsuario + "&key2=" + txtClave);
 
+            /*
             Multipart multipart = new MimeMultipart("related");
-
+            
             BodyPart texto = new MimeBodyPart();
-            texto.setContent(mensaje, "text/html");
+            //texto.setContent(mensaje, "text/html");
             multipart.addBodyPart(texto);
-
+            
             MimeBodyPart imagen = new MimeBodyPart();
-
+            
             //DataSource fds = new FileDataSource("C:\\Users\\jbv317\\OneDrive - Sherwin-Williams\\Pictures\\blue.jpg");
             DataSource fds = new URLDataSource(new URL("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRka-IgWuEloQHsL8poZ4ByLiQKYZFpAzRbugbCy2U8OkrkXtkp"));
             imagen.setDataHandler(new DataHandler(fds));
             //imagen.attachFile("C:\\Users\\jbv317\\OneDrive - Sherwin-Williams\\Pictures\\blue.jpg");
             imagen.setHeader("Content-ID", "<figura1>");
-
+          
             multipart.addBodyPart(imagen);
             message.setContent(multipart);
-
+             */
             Transport t = session.getTransport("smtp");
             t.connect(correoRemitente, passwordRemitente);
             t.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
@@ -261,7 +268,7 @@ public class PersonaDAO implements CrudPersona {
         }
         return enviado;
     }
-
+ 
     public void listarImg(int id, HttpServletResponse response) {
         String sql = "select * from persona where idpersona=" + id;
         InputStream inputStream = null;

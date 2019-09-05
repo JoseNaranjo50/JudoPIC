@@ -170,7 +170,7 @@
                                 </div>
                                 <div class="col-md-2 mb-5">
                                     <label for="validationTooltip12">Peso:</label>
-                                    <select type="text" value="${peredit.getPeso()}" name="txtPeso" class="form-control" id="validationTooltip12" pattern="^(-60Kg|-66Kg|-73Kg|-81Kg|-90Kg|-100Kg|100Kg|-48Kg|-52Kg|-57Kg|-63Kg|-70Kg|-78Kg|78Kg)$"  oninvalid="setCustomValidity('Por favor seleccione un campo valido')" required>
+                                    <select type="text" value="${peredit.getPeso()}" name="txtPeso" class="form-control" id="validationTooltip12" pattern="^(-60Kg|-66Kg|-73Kg|-81Kg|-90Kg|-100Kg|\+100Kg|-48Kg|-52Kg|-57Kg|-63Kg|-70Kg|-78Kg|\+78Kg)$"  oninvalid="setCustomValidity('Por favor seleccione un campo valido')" required>
                                         <option></option>
                                         <option>-60Kg</option>
                                         <option>-66Kg</option>

@@ -66,18 +66,16 @@
 
         <div class="d-flex " style="overflow-x:auto;">
 
-            <div class="col-sm-16">
+            <div class="col-sm-14">
                 <div class="card">
                     <div class="card-body">
                         <table class="table table-sm table-bordered ">
                             <thead>
                                 <tr align="center" valign="middle">
-                                    <th colspan="14">LISTA DE ENTRENADORES Y DEPORTISTAS DE LA ASOCIACION DE JUDO PICHINCHA</th>
+                                    <th colspan="12">LISTA DE ENTRENADORES Y DEPORTISTAS DE LA ASOCIACION DE JUDO PICHINCHA</th>
                                 </tr>
                                 <tr align="center" valign="middle">
-                                    <th>ID</th>
                                     <th>USUARIO</th>
-                                    <th>CLAVE</th>
                                     <th>FOTO</th>
                                     <th>CEDULA</th>
                                     <th>NOMBRE</th>
@@ -95,9 +93,7 @@
 
                                 <c:forEach var="per" items="${personas}">
                                     <tr>
-                                        <td>${per.getId()}</td>
                                         <td>${per.getUsuario()}</td>
-                                        <td>${per.getClave()}</td>
                                         <td><img src="ControlalorImg?id=${per.getId()}" width="150" heigth="130"></td>
                                         <td>${per.getCedula()}</td>
                                         <td>${per.getNombre()}</td>
