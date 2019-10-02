@@ -9,30 +9,57 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import modelo.Persona;
 import modeloDao.LoginDAO;
+import modeloDao.PersonaDAO;
 
 
 public class Controlador extends HttpServlet {
     LoginDAO dao=new LoginDAO();
     Persona per=new Persona();
+    PersonaDAO pdao=new PersonaDAO();
     int r;
     
    
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet controladorPersona</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet controladorPersona at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
+        //response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out=response.getWriter();
+        String accion=request.getParameter("accion");
+        if(accion.equals("Ingresar")){
+            String usuario=request.getParameter("txtUser");
+            String claveE=request.getParameter("txtClave");
+            String clave = pdao.Encriptar(claveE);
+            per.setUsuario(usuario);
+            per.setClave(clave);
+            dao.validar(per);
+            r=dao.validar(per);
+            if(r==1){
+                
+                HttpSession session = request.getSession();
+                session.setAttribute("usuario",per);
+                
+                ServletContext aplicacion= request.getServletContext();
+                aplicacion.setAttribute("usuario",per.getUsuario());
+                
+                request.getRequestDispatcher("ControladorPer?menu=Principal").forward(request, response);           
+            }else{
+                out.println("<script src='js/sweetalert2.js'></script>");
+                out.println("<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>");
+                out.println("<script>");
+                out.println("$(document).ready(function(){");
+                out.println("swal ( 'Usuario y/o Contraseña incorrectos' ,  ' ' ,  'error' );");
+                out.println("});");
+                out.println("</script>");
+                
+                RequestDispatcher rd = request.getRequestDispatcher("login.jsp");
+                rd.include(request, response);
+                //request.getRequestDispatcher("login.jsp").forward(request, response);
+            } 
+        }else{
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+         }
     }
 
   
@@ -54,8 +81,9 @@ public class Controlador extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //processRequest(request, response);
-        response.setContentType("text/html;charset=UTF-8");
+        processRequest(request, response);
+        /**response.setContentType("text/html;charset=UTF-8");
+        HttpSession session = request.getSession(true);
         String accion=request.getParameter("accion");
         if(accion.equals("Ingresar")){
             String usuario=request.getParameter("txtUser");
@@ -76,8 +104,10 @@ public class Controlador extends HttpServlet {
                 request.getRequestDispatcher("login.jsp").forward(request, response);
          }
         if(accion.equals("Salir")){
-            request.getRequestDispatcher("login.jsp").forward(request, response);
-        }
+            session.invalidate();
+            response.sendRedirect("login.jsp");
+            //request.getRequestDispatcher("login.jsp").forward(request, response);
+        }*/
     }
 
    

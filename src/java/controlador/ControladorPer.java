@@ -2,14 +2,18 @@ package controlador;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import static java.lang.System.out;
 import java.sql.Date;
 import java.util.List;
 import java.util.Random;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 import modelo.Persona;
 import modelo.TestPedagogico;
@@ -29,12 +33,30 @@ public class ControladorPer extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        PrintWriter out=response.getWriter();
+        HttpSession session = request.getSession();
+        per = (Persona) session.getAttribute("usuario");
+        if (per == null) {
+            request.getRequestDispatcher("ControladorErrorSession").forward(request, response);
+        }
         String menu = request.getParameter("menu");
         String accion = request.getParameter("accion");
         if (menu.equals("Principal")) {
-            request.getRequestDispatcher("principal.jsp").forward(request, response);
+
+            per = (Persona) session.getAttribute("usuario");
+            if (per == null) {
+                request.getRequestDispatcher("ControladorErrorSession").forward(request, response);
+            } else {
+               
+              request.getRequestDispatcher("principal.jsp").forward(request, response);
+            }
         }
         if (menu.equals("Persona")) {
+            per = (Persona) session.getAttribute("usuario");
+            if (per == null) {
+                request.getRequestDispatcher("ControladorErrorSession").forward(request, response);
+            }
             switch (accion) {
                 case "Listar":
                     List<Persona> lista = pdao.listarPer();
@@ -43,11 +65,13 @@ public class ControladorPer extends HttpServlet {
                     break;
                 case "Agregar":
                     String usuario = request.getParameter("txtUsuario");
-                    String myHash;
-                    Random random = new Random();
-                    random.nextInt(999999);
-                    String clave = DigestUtils.md5Hex("txtClave");
-                    myHash = DigestUtils.md5Hex(""+random);
+                    //String myHash;
+                    //Random random = new Random();
+                    //random.nextInt(999999);
+                    //String clave = DigestUtils.md5Hex("" + random);
+                    //myHash = DigestUtils.md5Hex(""+random);
+                    String claveE = request.getParameter("txtClave");
+                    String clave=pdao.Encriptar(claveE);
                     Part part = request.getPart("txtFoto");
                     InputStream foto = part.getInputStream();
                     String cedula = request.getParameter("txtCedula");
@@ -72,8 +96,9 @@ public class ControladorPer extends HttpServlet {
                     per.setSexo(sexo);
                     per.setPeso(peso);
                     pdao.agregarPer(per);
-                    //request.setAttribute("Mensaje", "Usuario agregado con exito");
+                     
                     request.getRequestDispatcher("ControladorPer?menu=Persona&accion=Enviar").forward(request, response);
+
                     break;
                 case "Enviar":
                     String usuarioC = request.getParameter("txtUsuario");
@@ -88,10 +113,16 @@ public class ControladorPer extends HttpServlet {
                     request.getRequestDispatcher("personaEditar.jsp").forward(request, response);
                     break;
                 case "Actualizar":
+                    InputStream fotoA = null;
+                    Part partA = null;
                     String usuarioA = request.getParameter("txtUsuario");
-                    String claveA = request.getParameter("txtClave");
-                    Part partA = request.getPart("txtFoto");
-                    InputStream fotoA = partA.getInputStream();
+                    //Random randomA = new Random();
+                    //randomA.nextInt(999999);
+                    //String claveA = DigestUtils.md5Hex("" + randomA);
+                    String claveAE = request.getParameter("txtClave");
+                    String claveA = pdao.Encriptar(claveAE);
+                    partA = request.getPart("txtFoto");
+                    fotoA = partA.getInputStream();
                     String cedulaA = request.getParameter("txtCedula");
                     String nombreA = request.getParameter("txtNombre");
                     String apellidoA = request.getParameter("txtApellido");
@@ -101,22 +132,41 @@ public class ControladorPer extends HttpServlet {
                     String categoriaA = request.getParameter("txtCategoria");
                     String sexoA = request.getParameter("txtSexo");
                     String pesoA = request.getParameter("txtPeso");
-                    per.setUsuario(usuarioA);
-                    per.setClave(claveA);
-                    per.setFoto(fotoA);
-                    per.setCedula(cedulaA);
-                    per.setNombre(nombreA);
-                    per.setApellido(apellidoA);
-                    per.setFechaNacimiento(fechaNacimientoA);
-                    per.setTipo(tipoA);
-                    per.setGrado(gradoA);
-                    per.setCategoria(categoriaA);
-                    per.setSexo(sexoA);
-                    per.setPeso(pesoA);
-                    per.setId(idp);
-                    pdao.actualizarPer(per);
-                    request.setAttribute("Mensaje", "Usuario actualizado con exito");
-                    request.getRequestDispatcher("ControladorPer?menu=Persona&accion=EnviarActualizado").forward(request, response);
+                    if (partA.getSize() > 0) {
+                        if (fotoA != null) {
+                            per.setUsuario(usuarioA);
+                            per.setClave(claveA);
+                            per.setFoto(fotoA);
+                            per.setCedula(cedulaA);
+                            per.setNombre(nombreA);
+                            per.setApellido(apellidoA);
+                            per.setFechaNacimiento(fechaNacimientoA);
+                            per.setTipo(tipoA);
+                            per.setGrado(gradoA);
+                            per.setCategoria(categoriaA);
+                            per.setSexo(sexoA);
+                            per.setPeso(pesoA);
+                            per.setId(idp);
+                            pdao.actualizarPerImg(per);
+                            request.getRequestDispatcher("ControladorPer?menu=Persona&accion=EnviarActualizado").forward(request, response);
+                        }
+                    } else {
+                        per.setUsuario(usuarioA);
+                        per.setClave(claveA);
+                        per.setCedula(cedulaA);
+                        per.setNombre(nombreA);
+                        per.setApellido(apellidoA);
+                        per.setFechaNacimiento(fechaNacimientoA);
+                        per.setTipo(tipoA);
+                        per.setGrado(gradoA);
+                        per.setCategoria(categoriaA);
+                        per.setSexo(sexoA);
+                        per.setPeso(pesoA);
+                        per.setId(idp);
+                        pdao.actualizarPer(per);
+                        request.getRequestDispatcher("ControladorPer?menu=Persona&accion=EnviarActualizado").forward(request, response);
+                    }
+                    //request.getRequestDispatcher("ControladorPer?menu=Persona&accion=EnviarActualizado").forward(request, response);
                     break;
                 case "EnviarActualizado":
                     String usuarioCA = request.getParameter("txtUsuario");
@@ -144,6 +194,10 @@ public class ControladorPer extends HttpServlet {
         }
 
         if (menu.equals("Test")) {
+            per = (Persona) session.getAttribute("usuario");
+            if (per == null) {
+                request.getRequestDispatcher("ControladorErrorSession").forward(request, response);
+            }
             switch (accion) {
                 case "Listar":
                     List lista = tdao.listarTest();
@@ -152,7 +206,7 @@ public class ControladorPer extends HttpServlet {
                     break;
                 case "Agregar":
                     String cedula = request.getParameter("txtCedula");
-                    Persona pe=tdao.buscarId(cedula);
+                    Persona pe = tdao.buscarId(cedula);
                     int idpersona = pe.getId();
                     int barras = Integer.parseInt(request.getParameter("txtBarras"));
                     int paralelas = Integer.parseInt(request.getParameter("txtParalelas"));
@@ -187,6 +241,10 @@ public class ControladorPer extends HttpServlet {
                     test.setPique50(pique50);
                     test.setPique100(pique100);
                     tdao.agregarTest(test);
+                 
+                    //String message = "Test ingresado";
+                    //request.setAttribute("message", message);
+                    //out.println("<script>alert('Usuario o contraseña incorrecta');</script>");
                     request.getRequestDispatcher("testNuevo.jsp").forward(request, response);
                     break;
                 case "Editar":
@@ -197,7 +255,7 @@ public class ControladorPer extends HttpServlet {
                     break;
                 case "Actualizar":
                     String cedulaA = request.getParameter("txtCedula");
-                    Persona peA=tdao.buscarId(cedulaA);
+                    Persona peA = tdao.buscarId(cedulaA);
                     int idpersonaA = peA.getId();
                     int barrasA = Integer.parseInt(request.getParameter("txtBarras"));
                     int paralelasA = Integer.parseInt(request.getParameter("txtParalelas"));
